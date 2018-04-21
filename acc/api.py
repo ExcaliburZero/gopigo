@@ -7,6 +7,7 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 import json
 
+import acc_commands
 
 """
   - create application instance of Flask
@@ -28,6 +29,11 @@ distance = 9999
 power = False
 
 """
+  A vairable to store the command queue to put incomming commands into.
+"""
+command_queue = None
+
+"""
   root path of application that renders the index.html
   file from the templates folder
 """
@@ -38,7 +44,9 @@ def index():
 """
   function that handles starting the application on port 8080
 """
-def run(isDebug):
+def run(comm_queue, isDebug):
+  global command_queue
+  command_queue = comm_queue
   app.run(port=8080, debug=isDebug, threaded=True)
 
 """
@@ -69,6 +77,9 @@ def post_settings():
   distance = dataDict['distance']
   print('speed: ', speed)
   print('distance: ', distance)
+
+  command_queue.put(acc_commands.ChangeSettingsCommand(speed, distance))
+
   return render_template('index.html')
 
 """
